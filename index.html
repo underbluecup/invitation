@@ -191,8 +191,13 @@
   .gallery-track::-webkit-scrollbar{ display:none; }
   .gallery-slide{
     flex:0 0 100%; scroll-snap-align:center; aspect-ratio:3/4; background:var(--cream);
+    -webkit-touch-callout:none;
   }
-  .gallery-slide img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .gallery-slide img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;
+    -webkit-user-drag:none; user-drag:none; pointer-events:none;
+  }
   .gallery-slide.landscape img{ object-fit:contain; background:var(--cream); }
   .gallery-arrow{
     position:absolute; top:50%; transform:translateY(-50%); width:34px; height:34px;
@@ -613,11 +618,29 @@
   })();
 
   // ---- carousel (shared by gallery + info) ----
+  // Loops infinitely: a clone of the last slide is placed before the first
+  // real slide and a clone of the first slide after the last. Swiping (or
+  // clicking an arrow) past either end lands on a clone, which looks
+  // identical to the real slide it stands in for; once the scroll settles
+  // we silently (no animation) snap back to the real slide underneath it.
   function initCarousel(trackId, dotsId, moveFnName, opts){
     var track = document.getElementById(trackId);
     var dotsWrap = document.getElementById(dotsId);
+    var real = Array.prototype.slice.call(track.children);
+    var realCount = real.length;
+    var loop = realCount > 1;
+    var offset = loop ? 1 : 0;
+
+    if(loop){
+      var firstClone = real[0].cloneNode(true);
+      var lastClone = real[realCount - 1].cloneNode(true);
+      firstClone.setAttribute('aria-hidden', 'true');
+      lastClone.setAttribute('aria-hidden', 'true');
+      track.insertBefore(lastClone, track.firstChild);
+      track.appendChild(firstClone);
+    }
+
     var slides = track.children;
-    var current = 0;
 
     if(opts && opts.detectOrientation){
       var imgs = track.querySelectorAll('img');
@@ -634,17 +657,20 @@
       }
     }
 
-    for(var i = 0; i < slides.length; i++){
+    for(var i = 0; i < realCount; i++){
       var dot = document.createElement('span');
       dot.className = 'dot' + (i === 0 ? ' active' : '');
       dot.addEventListener('click', (function(idx){
-        return function(){ slides[idx].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' }); };
+        return function(){ slides[idx + offset].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' }); };
       })(i));
       dotsWrap.appendChild(dot);
     }
     var dots = dotsWrap.children;
 
-    function updateDots(){
+    track.scrollLeft = slides[offset].offsetLeft;
+    var trackIndex = offset;
+
+    function nearestTrackIndex(){
       var center = track.scrollLeft + track.clientWidth / 2;
       var closest = 0, min = Infinity;
       for(var i = 0; i < slides.length; i++){
@@ -652,23 +678,49 @@
         var dist = Math.abs(mid - center);
         if(dist < min){ min = dist; closest = i; }
       }
-      current = closest;
-      for(var j = 0; j < dots.length; j++){ dots[j].classList.toggle('active', j === closest); }
+      return closest;
+    }
+
+    function settle(){
+      trackIndex = nearestTrackIndex();
+      var realIndex = trackIndex - offset;
+
+      if(loop && trackIndex === 0){
+        realIndex = realCount - 1;
+        trackIndex = realCount;
+        track.scrollLeft = slides[trackIndex].offsetLeft;
+      } else if(loop && trackIndex === slides.length - 1){
+        realIndex = 0;
+        trackIndex = offset;
+        track.scrollLeft = slides[trackIndex].offsetLeft;
+      }
+
+      for(var j = 0; j < dots.length; j++){ dots[j].classList.toggle('active', j === realIndex); }
     }
 
     track.addEventListener('scroll', function(){
       clearTimeout(track.__t);
-      track.__t = setTimeout(updateDots, 60);
+      track.__t = setTimeout(settle, 60);
     });
 
     window[moveFnName] = function(dir){
-      var idx = (current + dir + slides.length) % slides.length;
+      var idx = Math.max(0, Math.min(slides.length - 1, trackIndex + dir));
       slides[idx].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
     };
   }
 
   initCarousel('galleryTrack', 'galleryDots', 'galleryMove', { detectOrientation:true });
   initCarousel('infoTrack', 'infoDots', 'infoMove');
+
+  // ---- discourage saving gallery photos (long-press / right-click / drag) ----
+  // Note: this can't fully block saving (screenshots always work) — it just
+  // removes the easy path. pointer-events:none on the <img> (see CSS) is
+  // what actually stops iOS's long-press "사진에 저장" menu, since the touch
+  // target resolves to the slide div instead of the image; these listeners
+  // are a second layer for desktop right-click / drag-out.
+  var galleryTrackEl = document.getElementById('galleryTrack');
+  galleryTrackEl.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  galleryTrackEl.addEventListener('dragstart', function(e){ e.preventDefault(); });
 
   // ---- toast ----
   function showToast(msg){
