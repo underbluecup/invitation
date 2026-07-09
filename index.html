@@ -662,7 +662,7 @@
     });
 
     window[moveFnName] = function(dir){
-      var idx = Math.max(0, Math.min(slides.length - 1, current + dir));
+      var idx = (current + dir + slides.length) % slides.length;
       slides[idx].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
     };
   }
