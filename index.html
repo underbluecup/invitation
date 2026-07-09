@@ -180,15 +180,17 @@
   .cal-grid .day.mark span{ position:relative; z-index:1; }
 
   /* ================= GALLERY ================= */
-  .gallery-carousel{ position:relative; margin-top:20px; }
+  .gallery-carousel{
+    position:relative; margin-top:20px; border-radius:14px;
+    border:2.5px solid var(--ink); overflow:hidden; background:var(--cream);
+  }
   .gallery-track{
-    display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory;
-    -webkit-overflow-scrolling:touch; scrollbar-width:none; border-radius:14px;
+    display:flex; overflow-x:auto; scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none;
   }
   .gallery-track::-webkit-scrollbar{ display:none; }
   .gallery-slide{
-    flex:0 0 100%; scroll-snap-align:center; aspect-ratio:3/4; border-radius:14px;
-    overflow:hidden; border:2.5px solid var(--ink); background:var(--cream);
+    flex:0 0 100%; scroll-snap-align:center; aspect-ratio:3/4; background:var(--cream);
   }
   .gallery-slide img{ width:100%; height:100%; object-fit:cover; display:block; }
   .gallery-slide.landscape img{ object-fit:contain; background:var(--cream); }
