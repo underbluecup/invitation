@@ -235,13 +235,18 @@
   .transit-item .t-body .t-label{ font-family:'Noto Sans KR', sans-serif; font-weight:900; font-size:14px; color:var(--ink); }
   .transit-item .t-body .t-text{ margin-top:4px; font-size:13px; font-weight:500; color:var(--ink-soft); line-height:1.65; white-space:pre-line; }
 
-  .info-note{ margin-top:16px; }
-  .info-note ul{ margin:0; padding:0; list-style:none; }
-  .info-note li{
-    position:relative; padding-left:14px; font-size:14px; font-weight:500; color:var(--ink-soft); line-height:1.8; margin-bottom:10px;
+  .info-carousel{ position:relative; margin-top:16px; }
+  .info-frame{ border-radius:14px; border:2.5px solid var(--ink); overflow:hidden; background:var(--cream); }
+  .info-track{
+    display:flex; overflow-x:auto; scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none;
   }
-  .info-note li:last-child{ margin-bottom:0; }
-  .info-note li::before{ content:"-"; position:absolute; left:0; color:var(--terracotta); font-weight:700; }
+  .info-track::-webkit-scrollbar{ display:none; }
+  .info-slide{
+    flex:0 0 100%; scroll-snap-align:center; box-sizing:border-box;
+    min-height:120px; display:flex; align-items:center; justify-content:center; padding:24px 34px;
+  }
+  .info-slide p{ margin:0; font-size:14px; font-weight:500; color:var(--ink-soft); line-height:1.8; text-align:center; }
 
   /* ================= ACCOUNTS ================= */
   .acc-group{ margin-top:16px; border-top:2px solid var(--ink); }
@@ -463,12 +468,18 @@
   <section class="section info-section">
     <span class="eyebrow">✎ Information</span>
     <h2 class="section-title">안내</h2>
-    <div class="info-note">
-      <ul>
-        <li>식장에 화환 반입이 불가합니다. 마음으로 감사히 받겠습니다.</li>
-        <li>주차는 삼원가든 내 주차장에 발렛파킹으로 가능합니다. 주차 공간이 한정되어 있어 가급적 대중교통 이용을 부탁드립니다.</li>
-      </ul>
+    <div class="info-carousel">
+      <div class="info-frame">
+        <div class="info-track" id="infoTrack">
+          <div class="info-slide"><p>식장에 화환 반입이 불가합니다. 마음으로 감사히 받겠습니다.</p></div>
+          <div class="info-slide"><p>주차는 삼원가든 내 주차장에 발렛파킹으로 가능합니다. 주차 공간이 한정되어 있어 가급적 대중교통 이용을 부탁드립니다.</p></div>
+          <div class="info-slide"><p>식장에 ATM 기기가 없습니다. 양해 부탁드립니다.</p></div>
+        </div>
+      </div>
+      <button type="button" class="gallery-arrow prev" onclick="infoMove(-1)" aria-label="이전 안내">‹</button>
+      <button type="button" class="gallery-arrow next" onclick="infoMove(1)" aria-label="다음 안내">›</button>
     </div>
+    <div class="gallery-dots" id="infoDots"></div>
   </section>
 
   <div class="divider">
@@ -602,24 +613,26 @@
     else { badge.textContent = "함께한 지 " + Math.abs(diff) + "일"; }
   })();
 
-  // ---- gallery carousel ----
-  (function(){
-    var track = document.getElementById('galleryTrack');
-    var dotsWrap = document.getElementById('galleryDots');
+  // ---- carousel (shared by gallery + info) ----
+  function initCarousel(trackId, dotsId, moveFnName, opts){
+    var track = document.getElementById(trackId);
+    var dotsWrap = document.getElementById(dotsId);
     var slides = track.children;
     var current = 0;
 
-    var imgs = track.querySelectorAll('img');
-    function markOrientation(img){
-      if(img.naturalWidth > img.naturalHeight){
-        img.closest('.gallery-slide').classList.add('landscape');
+    if(opts && opts.detectOrientation){
+      var imgs = track.querySelectorAll('img');
+      var markOrientation = function(img){
+        if(img.naturalWidth > img.naturalHeight){
+          img.closest('.gallery-slide').classList.add('landscape');
+        }
+      };
+      for(var k = 0; k < imgs.length; k++){
+        (function(img){
+          if(img.complete){ markOrientation(img); }
+          else { img.addEventListener('load', function(){ markOrientation(img); }); }
+        })(imgs[k]);
       }
-    }
-    for(var k = 0; k < imgs.length; k++){
-      (function(img){
-        if(img.complete){ markOrientation(img); }
-        else { img.addEventListener('load', function(){ markOrientation(img); }); }
-      })(imgs[k]);
     }
 
     for(var i = 0; i < slides.length; i++){
@@ -649,11 +662,14 @@
       track.__t = setTimeout(updateDots, 60);
     });
 
-    window.galleryMove = function(dir){
+    window[moveFnName] = function(dir){
       var idx = Math.max(0, Math.min(slides.length - 1, current + dir));
       slides[idx].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
     };
-  })();
+  }
+
+  initCarousel('galleryTrack', 'galleryDots', 'galleryMove', { detectOrientation:true });
+  initCarousel('infoTrack', 'infoDots', 'infoMove');
 
   // ---- toast ----
   function showToast(msg){
