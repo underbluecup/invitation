@@ -92,6 +92,7 @@
     min-height:420px;
     overflow:hidden;
     background:var(--blue);
+    -webkit-touch-callout:none;
   }
   .hero img{
     position:absolute;
@@ -101,6 +102,8 @@
     object-fit:cover;
     object-position:72% 38%;
     display:block;
+    -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;
+    -webkit-user-drag:none; user-drag:none; pointer-events:none;
   }
   .hero .tag{
     position:absolute;
@@ -715,15 +718,16 @@
   initCarousel('galleryTrack', 'galleryDots', 'galleryMove', { detectOrientation:true });
   initCarousel('infoTrack', 'infoDots', 'infoMove');
 
-  // ---- discourage saving gallery photos (long-press / right-click / drag) ----
+  // ---- discourage saving photos (long-press / right-click / drag) ----
   // Note: this can't fully block saving (screenshots always work) — it just
   // removes the easy path. pointer-events:none on the <img> (see CSS) is
   // what actually stops iOS's long-press "사진에 저장" menu, since the touch
-  // target resolves to the slide div instead of the image; these listeners
+  // target resolves to the parent div instead of the image; these listeners
   // are a second layer for desktop right-click / drag-out.
-  var galleryTrackEl = document.getElementById('galleryTrack');
-  galleryTrackEl.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-  galleryTrackEl.addEventListener('dragstart', function(e){ e.preventDefault(); });
+  document.querySelectorAll('.hero, #galleryTrack').forEach(function(el){
+    el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+    el.addEventListener('dragstart', function(e){ e.preventDefault(); });
+  });
 
   // ---- toast ----
   function showToast(msg){
