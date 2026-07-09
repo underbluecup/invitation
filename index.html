@@ -180,13 +180,28 @@
   .cal-grid .day.mark span{ position:relative; z-index:1; }
 
   /* ================= GALLERY ================= */
-  .gallery-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:20px; }
-  .g-slot{
-    aspect-ratio:3/4; border:2.5px dashed var(--line); border-radius:14px; display:flex;
-    align-items:center; justify-content:center; background:var(--cream);
+  .gallery-carousel{ position:relative; margin-top:20px; }
+  .gallery-track{
+    display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none; border-radius:14px;
   }
-  .g-slot svg{ width:22px; height:22px; opacity:.4; }
-  .gallery-note{ margin-top:14px; font-size:12.5px; font-weight:500; color:var(--ink-soft); text-align:center; }
+  .gallery-track::-webkit-scrollbar{ display:none; }
+  .gallery-slide{
+    flex:0 0 100%; scroll-snap-align:center; aspect-ratio:3/4; border-radius:14px;
+    overflow:hidden; border:2.5px solid var(--ink); background:var(--cream);
+  }
+  .gallery-slide img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .gallery-arrow{
+    position:absolute; top:50%; transform:translateY(-50%); width:34px; height:34px;
+    border-radius:50%; border:2px solid var(--ink); background:var(--white); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700;
+    cursor:pointer; padding:0; line-height:1;
+  }
+  .gallery-arrow.prev{ left:-6px; }
+  .gallery-arrow.next{ right:-6px; }
+  .gallery-dots{ display:flex; justify-content:center; gap:6px; margin-top:14px; }
+  .gallery-dots .dot{ width:6px; height:6px; border-radius:50%; background:var(--line); transition:background .2s, transform .2s; cursor:pointer; }
+  .gallery-dots .dot.active{ background:var(--terracotta); transform:scale(1.3); }
 
   /* ================= LOCATION ================= */
   .location-section{ background:var(--cream); }
@@ -358,16 +373,25 @@
   <section class="section gallery">
     <span class="eyebrow">✎ Gallery</span>
     <h2 class="section-title">우리의 순간들</h2>
-    <div class="gallery-grid" id="galleryGrid">
-      <!-- 사진 6장이 들어갈 자리입니다. g-slot 하나당 <img> 태그로 교체해주세요. -->
-      <div class="g-slot"><svg viewBox="0 0 24 24" fill="none" stroke="#292620" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg></div>
-      <div class="g-slot"><svg viewBox="0 0 24 24" fill="none" stroke="#292620" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg></div>
-      <div class="g-slot"><svg viewBox="0 0 24 24" fill="none" stroke="#292620" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg></div>
-      <div class="g-slot"><svg viewBox="0 0 24 24" fill="none" stroke="#292620" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg></div>
-      <div class="g-slot"><svg viewBox="0 0 24 24" fill="none" stroke="#292620" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg></div>
-      <div class="g-slot"><svg viewBox="0 0 24 24" fill="none" stroke="#292620" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg></div>
+    <div class="gallery-carousel">
+      <div class="gallery-track" id="galleryTrack">
+        <div class="gallery-slide"><img src="images/0516 1630p101443.jpg" alt="우리의 순간 1" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/0516 1630p101464.jpg" alt="우리의 순간 2" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/0516 1630p101514.jpg" alt="우리의 순간 3" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/B_101355-수정.jpg" alt="우리의 순간 4" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/B_101370-수정.jpg" alt="우리의 순간 5" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/C_106-0321-resize.jpg" alt="우리의 순간 6" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/C_106-0360-resize.jpg" alt="우리의 순간 7" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/C_106-0380-resize.jpg" alt="우리의 순간 8" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/C_106-0382-resize.jpg" alt="우리의 순간 9" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/C_106-0394-resize.jpg" alt="우리의 순간 10" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/C_106-0419-resize.jpg" alt="우리의 순간 11" loading="lazy"></div>
+        <div class="gallery-slide"><img src="images/C_106-0485-resize.jpg" alt="우리의 순간 12" loading="lazy"></div>
+      </div>
+      <button type="button" class="gallery-arrow prev" onclick="galleryMove(-1)" aria-label="이전 사진">‹</button>
+      <button type="button" class="gallery-arrow next" onclick="galleryMove(1)" aria-label="다음 사진">›</button>
     </div>
-    <div class="gallery-note">사진은 준비되는 대로 채워질 예정입니다</div>
+    <div class="gallery-dots" id="galleryDots"></div>
   </section>
 
   <div class="divider">
@@ -570,6 +594,46 @@
     if(diff > 0){ badge.textContent = "결혼식까지 D-" + diff; }
     else if(diff === 0){ badge.textContent = "바로 오늘입니다"; }
     else { badge.textContent = "함께한 지 " + Math.abs(diff) + "일"; }
+  })();
+
+  // ---- gallery carousel ----
+  (function(){
+    var track = document.getElementById('galleryTrack');
+    var dotsWrap = document.getElementById('galleryDots');
+    var slides = track.children;
+    var current = 0;
+
+    for(var i = 0; i < slides.length; i++){
+      var dot = document.createElement('span');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', (function(idx){
+        return function(){ slides[idx].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' }); };
+      })(i));
+      dotsWrap.appendChild(dot);
+    }
+    var dots = dotsWrap.children;
+
+    function updateDots(){
+      var center = track.scrollLeft + track.clientWidth / 2;
+      var closest = 0, min = Infinity;
+      for(var i = 0; i < slides.length; i++){
+        var mid = slides[i].offsetLeft + slides[i].offsetWidth / 2;
+        var dist = Math.abs(mid - center);
+        if(dist < min){ min = dist; closest = i; }
+      }
+      current = closest;
+      for(var j = 0; j < dots.length; j++){ dots[j].classList.toggle('active', j === closest); }
+    }
+
+    track.addEventListener('scroll', function(){
+      clearTimeout(track.__t);
+      track.__t = setTimeout(updateDots, 60);
+    });
+
+    window.galleryMove = function(dir){
+      var idx = Math.max(0, Math.min(slides.length - 1, current + dir));
+      slides[idx].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+    };
   })();
 
   // ---- toast ----
