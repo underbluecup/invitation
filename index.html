@@ -295,10 +295,24 @@
     font-size:16px; cursor:pointer; margin-top:6px; box-shadow:4px 4px 0 var(--ink);
   }
   .submit-btn:active{ box-shadow:none; transform:translate(4px,4px); }
+  .submit-btn:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
   .rsvp-done{
     display:none; margin-top:20px; padding:18px; border-radius:14px; border:2.5px solid var(--ink);
     background:var(--sage); color:#fff; font-size:14px; font-weight:700; line-height:1.7; text-align:center;
   }
+
+  /* ================= GUEST SNAP ================= */
+  .snap-form{ margin-top:20px; }
+  .snap-picker{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    border:2.5px dashed var(--line); border-radius:14px; padding:28px 16px; cursor:pointer;
+    background:var(--cream); text-align:center; margin-bottom:16px;
+  }
+  .snap-picker svg{ width:26px; height:26px; opacity:.5; }
+  .snap-picker span{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+  .snap-preview{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:-4px 0 16px; }
+  .snap-preview:empty{ display:none; margin:0; }
+  .snap-preview img{ width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:10px; border:2px solid var(--ink); }
 
   /* ================= FOOTER ================= */
   footer{ padding:46px 26px 56px; text-align:center; background:var(--blue); }
@@ -593,6 +607,40 @@
     </div>
   </section>
 
+  <div class="divider">
+    <span class="dot" style="background:var(--terracotta)"></span>
+    <span class="dot" style="background:var(--sage)"></span>
+    <span class="dot" style="background:var(--mustard)"></span>
+  </div>
+
+  <!-- ========== GUEST SNAP ========== -->
+  <section class="section guest-snap">
+    <span class="eyebrow">✎ Guest Snap</span>
+    <h2 class="section-title">게스트 스냅</h2>
+    <p class="rsvp-note">현장에서 찍으신 사진을 올려주시면 신랑신부에게 소중히 전달됩니다.</p>
+
+    <form class="snap-form" id="snapForm">
+      <div class="field">
+        <label for="snapName">성함 (선택)</label>
+        <input type="text" id="snapName" placeholder="이름을 입력해주세요">
+      </div>
+
+      <label class="snap-picker" for="snapFile">
+        <input type="file" id="snapFile" accept="image/*" capture="environment" multiple hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#292620" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg>
+        <span id="snapPickerText">사진 선택하기</span>
+      </label>
+
+      <div class="snap-preview" id="snapPreview"></div>
+
+      <button type="submit" class="submit-btn" id="snapSubmit" disabled>업로드하기</button>
+    </form>
+
+    <div class="rsvp-done" id="snapDone">
+      소중한 사진 감사합니다 🤍<br>업로드가 완료됐어요.
+    </div>
+  </section>
+
   <!-- ========== FOOTER ========== -->
   <footer>
     <div class="fmark">🫧🤍☁️감사합니다🍒🌷🩷</div>
@@ -788,6 +836,72 @@
     document.getElementById('rsvpForm').style.display = 'none';
     document.getElementById('rsvpDone').style.display = 'block';
   });
+
+  // ---- guest snap upload : 같은 Apps Script 웹앱에 {type:'photo', ...}로 보냅니다.
+  // doPost에서 data.type === 'photo'일 때 지정한 구글 드라이브 폴더에 저장하도록
+  // 분기 처리가 되어 있어야 합니다.
+  (function(){
+    var fileInput = document.getElementById('snapFile');
+    var pickerText = document.getElementById('snapPickerText');
+    var preview = document.getElementById('snapPreview');
+    var submitBtn = document.getElementById('snapSubmit');
+    var form = document.getElementById('snapForm');
+    var selectedFiles = [];
+
+    function resizeImage(file, maxDim, quality){
+      return new Promise(function(resolve, reject){
+        var reader = new FileReader();
+        reader.onload = function(e){
+          var img = new Image();
+          img.onload = function(){
+            var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+            var w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+            var canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    fileInput.addEventListener('change', function(){
+      selectedFiles = Array.prototype.slice.call(fileInput.files);
+      preview.innerHTML = '';
+      selectedFiles.forEach(function(file){
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        preview.appendChild(img);
+      });
+      pickerText.textContent = selectedFiles.length ? selectedFiles.length + '장 선택됨' : '사진 선택하기';
+      submitBtn.disabled = selectedFiles.length === 0;
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      if(!selectedFiles.length){ showToast('사진을 선택해주세요'); return; }
+
+      var name = document.getElementById('snapName').value.trim();
+
+      if(RSVP_ENDPOINT && RSVP_ENDPOINT.indexOf('여기에') === -1){
+        selectedFiles.forEach(function(file){
+          resizeImage(file, 1600, 0.82).then(function(base64){
+            fetch(RSVP_ENDPOINT, {
+              method: 'POST',
+              body: JSON.stringify({ type: 'photo', name: name, imageData: base64 })
+            }).catch(function(){ /* 네트워크 오류가 있어도 사용자에게는 완료 화면을 보여줍니다 */ });
+          });
+        });
+      }
+
+      form.style.display = 'none';
+      document.getElementById('snapDone').style.display = 'block';
+    });
+  })();
 
   // ---- naver / kakao map (JS SDK) : 발급받은 키를 아래에 넣으면
   // 정지 이미지 대신 드래그/확대가 가능한 인터랙티브 지도로 자동 전환됩니다.
