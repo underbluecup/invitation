@@ -626,7 +626,7 @@
       </div>
 
       <label class="snap-picker" for="snapFile">
-        <input type="file" id="snapFile" accept="image/*" capture="environment" multiple hidden>
+        <input type="file" id="snapFile" accept="image/*" multiple hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="#292620" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg>
         <span id="snapPickerText">사진 선택하기</span>
       </label>
@@ -848,22 +848,10 @@
     var form = document.getElementById('snapForm');
     var selectedFiles = [];
 
-    function resizeImage(file, maxDim, quality){
+    function readAsBase64(file){
       return new Promise(function(resolve, reject){
         var reader = new FileReader();
-        reader.onload = function(e){
-          var img = new Image();
-          img.onload = function(){
-            var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
-            var w = Math.round(img.width * scale), h = Math.round(img.height * scale);
-            var canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
-        };
+        reader.onload = function(e){ resolve(e.target.result.split(',')[1]); };
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
@@ -889,10 +877,10 @@
 
       if(RSVP_ENDPOINT && RSVP_ENDPOINT.indexOf('여기에') === -1){
         selectedFiles.forEach(function(file){
-          resizeImage(file, 1600, 0.82).then(function(base64){
+          readAsBase64(file).then(function(base64){
             fetch(RSVP_ENDPOINT, {
               method: 'POST',
-              body: JSON.stringify({ type: 'photo', name: name, imageData: base64 })
+              body: JSON.stringify({ type: 'photo', name: name, imageData: base64, mimeType: file.type || 'image/jpeg' })
             }).catch(function(){ /* 네트워크 오류가 있어도 사용자에게는 완료 화면을 보여줍니다 */ });
           });
         });
