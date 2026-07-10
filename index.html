@@ -766,11 +766,31 @@
     body.style.maxHeight = expanded ? '0px' : body.scrollHeight + 'px';
   }
 
-  // ---- rsvp submit (front-end only demo) ----
+  // ---- rsvp submit : Google Apps Script 웹앱 URL을 아래에 넣으면
+  // 제출 시 연결된 구글 시트에 응답이 자동으로 한 행씩 쌓입니다.
+  // 배포 방법: 구글 시트 > 확장 프로그램 > Apps Script에 doPost 함수를 작성하고
+  // "배포 > 새 배포 > 웹 앱" (실행 대상: 나, 액세스: 모든 사용자)으로 배포 후 나오는 URL을 사용하세요.
+  var RSVP_ENDPOINT = "여기에_Google_Apps_Script_웹앱_URL을_입력하세요"; // TODO: 배포 후 실제 URL로 교체
+
   document.getElementById('rsvpForm').addEventListener('submit', function(e){
     e.preventDefault();
     var name = document.getElementById('rsvpName').value.trim();
     if(!name){ showToast('성함을 입력해주세요'); return; }
+
+    if(RSVP_ENDPOINT && RSVP_ENDPOINT.indexOf('여기에') === -1){
+      var attendEl = document.querySelector('input[name="attend"]:checked');
+      fetch(RSVP_ENDPOINT, {
+        method: 'POST',
+        body: JSON.stringify({
+          name: name,
+          attend: attendEl ? attendEl.value : '',
+          count: document.getElementById('rsvpCount').value,
+          phone: document.getElementById('rsvpPhone').value.trim(),
+          message: document.getElementById('rsvpMsg').value.trim()
+        })
+      }).catch(function(){ /* 네트워크 오류가 있어도 사용자에게는 완료 화면을 보여줍니다 */ });
+    }
+
     document.getElementById('rsvpForm').style.display = 'none';
     document.getElementById('rsvpDone').style.display = 'block';
   });
