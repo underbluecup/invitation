@@ -285,7 +285,8 @@
   .rsvp-note{ margin-top:10px; font-size:14.5px; font-weight:500; color:var(--ink-soft); line-height:1.7; }
   form.rsvp{ margin-top:20px; }
   .field{ margin-bottom:16px; }
-  .field label{ display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:7px; }
+  fieldset.field{ border:0; margin:0 0 16px; padding:0; min-width:0; }
+  .field label, .field legend{ display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:7px; padding:0; }
   .field input[type=text], .field input[type=tel], .field select, .field textarea{
     width:100%; font-family:'Noto Sans KR', sans-serif; font-weight:500; font-size:14.5px; padding:12px 13px;
     border:2px solid var(--ink); border-radius:12px; background:var(--cream); color:var(--ink);
@@ -563,13 +564,13 @@
         <input type="text" id="rsvpName" required placeholder="이름을 입력해주세요">
       </div>
 
-      <div class="field">
-        <label>참석 여부</label>
+      <fieldset class="field">
+        <legend>참석 여부</legend>
         <div class="radio-row">
           <label><input type="radio" name="attend" value="참석" checked><span>참석합니다</span></label>
           <label><input type="radio" name="attend" value="미참석"><span>참석이 어려워요</span></label>
         </div>
-      </div>
+      </fieldset>
 
       <div class="field">
         <label for="rsvpCount">참석 인원 (본인 포함)</label>
