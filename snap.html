@@ -90,7 +90,15 @@
   .snap-picker span{ font-size:13px; font-weight:700; color:var(--ink-soft); }
   .snap-preview{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:-4px 0 16px; }
   .snap-preview:empty{ display:none; margin:0; }
-  .snap-preview img{ width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:10px; border:2px solid var(--ink); }
+  .snap-thumb{
+    position:relative; aspect-ratio:1/1; border-radius:10px; overflow:hidden;
+    border:2px solid var(--ink); background:var(--ink);
+  }
+  .snap-thumb img, .snap-thumb video{ width:100%; height:100%; object-fit:cover; display:block; }
+  .snap-thumb .snap-thumb-play{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:18px; color:#fff; background:rgba(0,0,0,.25); pointer-events:none;
+  }
 
   .toast{
     position:fixed; left:50%; bottom:26px; transform:translate(-50%, 20px);
@@ -108,7 +116,7 @@
 
     <span class="eyebrow">✎ Guest Snap</span>
     <h2 class="section-title">게스트 스냅</h2>
-    <p class="rsvp-note">현장에서 찍으신 사진을 올려주시면 신랑신부에게 소중히 전달됩니다.</p>
+    <p class="rsvp-note">현장에서 찍으신 사진과 동영상을 올려주시면 신랑신부에게 소중히 전달됩니다.</p>
 
     <form class="snap-form" id="snapForm">
       <div class="field">
@@ -117,9 +125,9 @@
       </div>
 
       <label class="snap-picker" for="snapFile">
-        <input type="file" id="snapFile" accept="image/*" multiple hidden>
+        <input type="file" id="snapFile" accept="image/*,video/*" multiple hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="#292620" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg>
-        <span id="snapPickerText">사진 선택하기</span>
+        <span id="snapPickerText">사진/동영상 선택하기</span>
       </label>
 
       <div class="snap-preview" id="snapPreview"></div>
@@ -128,7 +136,7 @@
     </form>
 
     <div class="rsvp-done" id="snapDone">
-      소중한 사진 감사합니다 🤍<br>업로드가 완료됐어요.<br><a href="index.html">청첩장으로 돌아가기</a>
+      소중한 사진과 영상 감사합니다 🤍<br>업로드가 완료됐어요.<br><a href="index.html">청첩장으로 돌아가기</a>
     </div>
   </section>
 
@@ -150,6 +158,10 @@
   // 분기 처리가 되어 있어야 합니다.
   var RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbzA5dsf_6OSNYiKJ1lI3xpcGFclOUWiwBc9BSG2pQo-fLHRe1nUCv0XRsAgUZHuPqkp/exec";
 
+  // Apps Script 웹앱은 요청 본문 크기에 실질적인 한계가 있어(대략 30~40MB대),
+  // base64로 부풀려졌을 때 그 한계를 넘지 않도록 원본 파일 크기를 미리 제한합니다.
+  var MAX_FILE_BYTES = 35 * 1024 * 1024;
+
   (function(){
     var fileInput = document.getElementById('snapFile');
     var pickerText = document.getElementById('snapPickerText');
@@ -168,20 +180,38 @@
     }
 
     fileInput.addEventListener('change', function(){
-      selectedFiles = Array.prototype.slice.call(fileInput.files);
+      var picked = Array.prototype.slice.call(fileInput.files);
+      var tooBig = picked.filter(function(file){ return file.size > MAX_FILE_BYTES; });
+      selectedFiles = picked.filter(function(file){ return file.size <= MAX_FILE_BYTES; });
+
+      if(tooBig.length){
+        showToast(tooBig.length + '개 파일이 너무 커서 제외됐어요 (35MB 이하만 가능)');
+      }
+
       preview.innerHTML = '';
       selectedFiles.forEach(function(file){
-        var img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        preview.appendChild(img);
+        var isVideo = file.type.indexOf('video') === 0;
+        var thumb = document.createElement('div');
+        thumb.className = 'snap-thumb';
+        var media = document.createElement(isVideo ? 'video' : 'img');
+        media.src = URL.createObjectURL(file);
+        if(isVideo){ media.muted = true; media.playsInline = true; }
+        thumb.appendChild(media);
+        if(isVideo){
+          var play = document.createElement('span');
+          play.className = 'snap-thumb-play';
+          play.textContent = '▶';
+          thumb.appendChild(play);
+        }
+        preview.appendChild(thumb);
       });
-      pickerText.textContent = selectedFiles.length ? selectedFiles.length + '장 선택됨' : '사진 선택하기';
+      pickerText.textContent = selectedFiles.length ? selectedFiles.length + '개 선택됨' : '사진/동영상 선택하기';
       submitBtn.disabled = selectedFiles.length === 0;
     });
 
     form.addEventListener('submit', function(e){
       e.preventDefault();
-      if(!selectedFiles.length){ showToast('사진을 선택해주세요'); return; }
+      if(!selectedFiles.length){ showToast('사진이나 동영상을 선택해주세요'); return; }
 
       var name = document.getElementById('snapName').value.trim();
 
