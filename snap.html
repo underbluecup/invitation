@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>게스트 스냅 · 한현규 ﹒ 권정현 결혼합니다</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --blue:         #519769;
+    --terracotta:   #9D75E6;
+    --sage:         #38FF92;
+    --cream:        #FFFDE8;
+    --white:        #FFFFFF;
+    --ink:          #1B1B1B;
+    --ink-soft:     #514f45;
+    --line:         rgba(27,27,27,0.14);
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--blue);
+    color:var(--ink);
+    font-family:'Noto Sans KR', sans-serif;
+    font-weight:400;
+    display:flex;
+    justify-content:center;
+  }
+  @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
+
+  .frame{
+    width:100%;
+    max-width:480px;
+    background:var(--white);
+    min-height:100vh;
+    position:relative;
+    box-shadow:0 0 60px rgba(0,0,0,0.35);
+  }
+
+  .section{ padding:58px 26px; position:relative; }
+
+  .back-link{
+    display:flex; align-items:center; gap:4px; font-size:13px; font-weight:700;
+    color:var(--ink-soft); text-decoration:none; margin-bottom:18px;
+  }
+
+  .eyebrow{
+    font-family:'Noto Sans KR', sans-serif; font-weight:700; font-size:13px; letter-spacing:.04em;
+    color:var(--terracotta); display:inline-flex; align-items:center; gap:8px;
+  }
+  h2.section-title{
+    font-family:'Noto Sans KR', sans-serif; font-weight:900; font-size:24px; margin:8px 0 4px;
+    color:var(--ink); line-height:1.35;
+  }
+  .rsvp-note{ margin-top:10px; font-size:14.5px; font-weight:500; color:var(--ink-soft); line-height:1.7; }
+
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:7px; }
+  .field input[type=text]{
+    width:100%; font-family:'Noto Sans KR', sans-serif; font-weight:500; font-size:14.5px; padding:12px 13px;
+    border:2px solid var(--ink); border-radius:12px; background:var(--cream); color:var(--ink);
+  }
+
+  .submit-btn{
+    width:100%; padding:15px; border:2.5px solid var(--ink); border-radius:12px;
+    background:var(--terracotta); color:var(--white); font-family:'Noto Sans KR', sans-serif; font-weight:900;
+    font-size:16px; cursor:pointer; margin-top:6px; box-shadow:4px 4px 0 var(--ink);
+  }
+  .submit-btn:active{ box-shadow:none; transform:translate(4px,4px); }
+  .submit-btn:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+  .rsvp-done{
+    display:none; margin-top:20px; padding:18px; border-radius:14px; border:2.5px solid var(--ink);
+    background:var(--sage); color:#fff; font-size:14px; font-weight:700; line-height:1.7; text-align:center;
+  }
+  .rsvp-done a{ color:#fff; text-decoration:underline; }
+
+  .snap-form{ margin-top:20px; }
+  .snap-picker{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    border:2.5px dashed var(--line); border-radius:14px; padding:28px 16px; cursor:pointer;
+    background:var(--cream); text-align:center; margin-bottom:16px;
+  }
+  .snap-picker svg{ width:26px; height:26px; opacity:.5; }
+  .snap-picker span{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+  .snap-preview{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:-4px 0 16px; }
+  .snap-preview:empty{ display:none; margin:0; }
+  .snap-thumb{
+    position:relative; aspect-ratio:1/1; border-radius:10px; overflow:hidden;
+    border:2px solid var(--ink); background:var(--ink);
+  }
+  .snap-thumb img, .snap-thumb video{ width:100%; height:100%; object-fit:cover; display:block; }
+  .snap-thumb .snap-thumb-play{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:18px; color:#fff; background:rgba(0,0,0,.25); pointer-events:none;
+  }
+
+  .toast{
+    position:fixed; left:50%; bottom:26px; transform:translate(-50%, 20px);
+    background:var(--ink); color:var(--white); font-size:13px; font-weight:700; padding:11px 18px;
+    border-radius:999px; opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease; z-index:50;
+  }
+  .toast.show{ opacity:1; transform:translate(-50%,0); }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <section class="section">
+    <a class="back-link" href="index.html">‹ 청첩장으로</a>
+
+    <span class="eyebrow">✎ Guest Snap</span>
+    <h2 class="section-title">게스트 스냅</h2>
+    <p class="rsvp-note">현장에서 찍으신 사진과 동영상을 올려주시면 신랑신부에게 소중히 전달됩니다.</p>
+
+    <form class="snap-form" id="snapForm">
+      <div class="field">
+        <label for="snapName">성함 (선택)</label>
+        <input type="text" id="snapName" placeholder="이름을 입력해주세요">
+      </div>
+
+      <label class="snap-picker" for="snapFile">
+        <input type="file" id="snapFile" accept="image/*,video/*" multiple hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#292620" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2h5L16 6"/></svg>
+        <span id="snapPickerText">사진/동영상 선택하기</span>
+      </label>
+
+      <div class="snap-preview" id="snapPreview"></div>
+
+      <button type="submit" class="submit-btn" id="snapSubmit" disabled>업로드하기</button>
+    </form>
+
+    <div class="rsvp-done" id="snapDone">
+      소중한 사진과 영상 감사합니다 🤍<br>업로드가 완료됐어요.<br><a href="index.html">청첩장으로 돌아가기</a>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 1800);
+  }
+
+  // ---- guest snap upload : 같은 Apps Script 웹앱에 {type:'photo', ...}로 보냅니다.
+  // doPost에서 data.type === 'photo'일 때 지정한 구글 드라이브 폴더에 저장하도록
+  // 분기 처리가 되어 있어야 합니다.
+  var RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbzA5dsf_6OSNYiKJ1lI3xpcGFclOUWiwBc9BSG2pQo-fLHRe1nUCv0XRsAgUZHuPqkp/exec";
+
+  // Apps Script 웹앱은 요청 본문 크기에 실질적인 한계가 있어(대략 30~40MB대),
+  // base64로 부풀려졌을 때 그 한계를 넘지 않도록 원본 파일 크기를 미리 제한합니다.
+  var MAX_FILE_BYTES = 35 * 1024 * 1024;
+
+  (function(){
+    var fileInput = document.getElementById('snapFile');
+    var pickerText = document.getElementById('snapPickerText');
+    var preview = document.getElementById('snapPreview');
+    var submitBtn = document.getElementById('snapSubmit');
+    var form = document.getElementById('snapForm');
+    var selectedFiles = [];
+
+    function readAsBase64(file){
+      return new Promise(function(resolve, reject){
+        var reader = new FileReader();
+        reader.onload = function(e){ resolve(e.target.result.split(',')[1]); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    fileInput.addEventListener('change', function(){
+      var picked = Array.prototype.slice.call(fileInput.files);
+      var tooBig = picked.filter(function(file){ return file.size > MAX_FILE_BYTES; });
+      selectedFiles = picked.filter(function(file){ return file.size <= MAX_FILE_BYTES; });
+
+      if(tooBig.length){
+        showToast(tooBig.length + '개 파일이 너무 커서 제외됐어요 (35MB 이하만 가능)');
+      }
+
+      preview.innerHTML = '';
+      selectedFiles.forEach(function(file){
+        var isVideo = file.type.indexOf('video') === 0;
+        var thumb = document.createElement('div');
+        thumb.className = 'snap-thumb';
+        var media = document.createElement(isVideo ? 'video' : 'img');
+        media.src = URL.createObjectURL(file);
+        if(isVideo){ media.muted = true; media.playsInline = true; }
+        thumb.appendChild(media);
+        if(isVideo){
+          var play = document.createElement('span');
+          play.className = 'snap-thumb-play';
+          play.textContent = '▶';
+          thumb.appendChild(play);
+        }
+        preview.appendChild(thumb);
+      });
+      pickerText.textContent = selectedFiles.length ? selectedFiles.length + '개 선택됨' : '사진/동영상 선택하기';
+      submitBtn.disabled = selectedFiles.length === 0;
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      if(!selectedFiles.length){ showToast('사진이나 동영상을 선택해주세요'); return; }
+
+      var name = document.getElementById('snapName').value.trim();
+
+      if(RSVP_ENDPOINT && RSVP_ENDPOINT.indexOf('여기에') === -1){
+        selectedFiles.forEach(function(file){
+          readAsBase64(file).then(function(base64){
+            fetch(RSVP_ENDPOINT, {
+              method: 'POST',
+              body: JSON.stringify({ type: 'photo', name: name, imageData: base64, mimeType: file.type || 'image/jpeg' })
+            }).catch(function(){ /* 네트워크 오류가 있어도 사용자에게는 완료 화면을 보여줍니다 */ });
+          });
+        });
+      }
+
+      form.style.display = 'none';
+      document.getElementById('snapDone').style.display = 'block';
+    });
+  })();
+</script>
+</body>
+</html>
