@@ -285,13 +285,15 @@
   .rsvp-note{ margin-top:10px; font-size:14.5px; font-weight:500; color:var(--ink-soft); line-height:1.7; }
   form.rsvp{ margin-top:20px; }
   .field{ margin-bottom:16px; }
-  .field label{ display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:7px; }
-  .field input[type=text], .field input[type=tel], .field select, .field textarea{
+  fieldset.field{ border:0; margin:0 0 16px; padding:0; min-width:0; }
+  .field label, .field legend{ display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:7px; padding:0; }
+  .field input[type=text], .field select, .field textarea{
     width:100%; font-family:'Noto Sans KR', sans-serif; font-weight:500; font-size:14.5px; padding:12px 13px;
     border:2px solid var(--ink); border-radius:12px; background:var(--cream); color:var(--ink);
   }
   .field textarea{ resize:vertical; min-height:70px; }
   .radio-row{ display:flex; gap:8px; }
+  .radio-row + .radio-row{ margin-top:8px; }
   .radio-row label{
     flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:12px 0;
     border:2px solid var(--ink); border-radius:12px; font-size:14px; font-weight:700; color:var(--ink-soft);
@@ -309,7 +311,6 @@
     display:none; margin-top:20px; padding:18px; border-radius:14px; border:2.5px solid var(--ink);
     background:var(--sage); color:#fff; font-size:14px; font-weight:700; line-height:1.7; text-align:center;
   }
-  .rsvp-dev-note{ margin-top:14px; font-size:11.5px; font-weight:400; color:var(--ink-soft); opacity:.8; line-height:1.6; }
 
   /* ================= FOOTER ================= */
   footer{ padding:46px 26px 56px; text-align:center; background:var(--blue); }
@@ -563,13 +564,27 @@
         <input type="text" id="rsvpName" required placeholder="이름을 입력해주세요">
       </div>
 
-      <div class="field">
-        <label>참석 여부</label>
+      <fieldset class="field">
+        <legend>어느 측 하객이신가요?</legend>
+        <div class="radio-row">
+          <label><input type="radio" name="side" value="신랑"><span>신랑</span></label>
+          <label><input type="radio" name="side" value="신랑 부"><span>신랑 부</span></label>
+          <label><input type="radio" name="side" value="신랑 모"><span>신랑 모</span></label>
+        </div>
+        <div class="radio-row">
+          <label><input type="radio" name="side" value="신부"><span>신부</span></label>
+          <label><input type="radio" name="side" value="신부 부"><span>신부 부</span></label>
+          <label><input type="radio" name="side" value="신부 모"><span>신부 모</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>참석 여부</legend>
         <div class="radio-row">
           <label><input type="radio" name="attend" value="참석" checked><span>참석합니다</span></label>
           <label><input type="radio" name="attend" value="미참석"><span>참석이 어려워요</span></label>
         </div>
-      </div>
+      </fieldset>
 
       <div class="field">
         <label for="rsvpCount">참석 인원 (본인 포함)</label>
@@ -579,20 +594,11 @@
       </div>
 
       <div class="field">
-        <label for="rsvpPhone">연락처</label>
-        <input type="tel" id="rsvpPhone" placeholder="010-0000-0000">
-      </div>
-
-      <div class="field">
         <label for="rsvpMsg">전하고 싶은 말 (선택)</label>
         <textarea id="rsvpMsg" placeholder="축하 메시지를 남겨주세요"></textarea>
       </div>
 
       <button type="submit" class="submit-btn">전달하기</button>
-      <div class="rsvp-dev-note">
-        ✎ 개발 노트 : 현재는 실제 서버가 없어 제출 시 화면에 확인 메시지만 표시됩니다.
-        실제로 응답을 수집하시려면 Google Form 연동이나 별도 백엔드(Google Apps Script, Airtable 등) 연결이 필요합니다. 필요하시면 도와드릴게요.
-      </div>
     </form>
 
     <div class="rsvp-done" id="rsvpDone">
@@ -765,11 +771,33 @@
     body.style.maxHeight = expanded ? '0px' : body.scrollHeight + 'px';
   }
 
-  // ---- rsvp submit (front-end only demo) ----
+  // ---- rsvp submit : Google Apps Script 웹앱 URL을 아래에 넣으면
+  // 제출 시 연결된 구글 시트에 응답이 자동으로 한 행씩 쌓입니다.
+  // 배포 방법: 구글 시트 > 확장 프로그램 > Apps Script에 doPost 함수를 작성하고
+  // "배포 > 새 배포 > 웹 앱" (실행 대상: 나, 액세스: 모든 사용자)으로 배포 후 나오는 URL을 사용하세요.
+  var RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbzA5dsf_6OSNYiKJ1lI3xpcGFclOUWiwBc9BSG2pQo-fLHRe1nUCv0XRsAgUZHuPqkp/exec";
+
   document.getElementById('rsvpForm').addEventListener('submit', function(e){
     e.preventDefault();
     var name = document.getElementById('rsvpName').value.trim();
     if(!name){ showToast('성함을 입력해주세요'); return; }
+    var sideEl = document.querySelector('input[name="side"]:checked');
+    if(!sideEl){ showToast('구분을 선택해주세요'); return; }
+
+    if(RSVP_ENDPOINT && RSVP_ENDPOINT.indexOf('여기에') === -1){
+      var attendEl = document.querySelector('input[name="attend"]:checked');
+      fetch(RSVP_ENDPOINT, {
+        method: 'POST',
+        body: JSON.stringify({
+          name: name,
+          side: sideEl.value,
+          attend: attendEl ? attendEl.value : '',
+          count: document.getElementById('rsvpCount').value,
+          message: document.getElementById('rsvpMsg').value.trim()
+        })
+      }).catch(function(){ /* 네트워크 오류가 있어도 사용자에게는 완료 화면을 보여줍니다 */ });
+    }
+
     document.getElementById('rsvpForm').style.display = 'none';
     document.getElementById('rsvpDone').style.display = 'block';
   });
