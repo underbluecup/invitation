@@ -261,7 +261,11 @@
     display:flex; justify-content:space-between; align-items:center;
     font-family:'Noto Sans KR', sans-serif; font-weight:900; font-size:16px; color:var(--ink); cursor:pointer;
   }
-  .acc-head .chev{ transition:transform .25s ease; font-size:22px; line-height:1; color:var(--ink); }
+  .acc-head .chev{
+    flex-shrink:0; width:34px; height:34px; border-radius:50%; border:2px solid var(--ink);
+    background:var(--cream); color:var(--ink); display:flex; align-items:center; justify-content:center;
+    font-size:18px; font-weight:700; line-height:1; transition:transform .25s ease;
+  }
   .acc-head[aria-expanded="true"] .chev{ transform:rotate(180deg); }
   .acc-body{ max-height:0; overflow:hidden; transition:max-height .3s ease; }
   .acc-row{ display:flex; justify-content:space-between; align-items:center; padding:14px 4px; border-bottom:1.5px dashed var(--line); }
