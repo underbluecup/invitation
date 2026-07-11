@@ -182,8 +182,12 @@
   }
   .gallery-track::-webkit-scrollbar{ display:none; }
   .gallery-slide{
-    flex:0 0 100%; scroll-snap-align:center; aspect-ratio:3/4; background:var(--cream);
+    position:relative; flex:0 0 100%; scroll-snap-align:center; aspect-ratio:3/4; background:var(--cream);
     -webkit-touch-callout:none;
+  }
+  .pic-credit{
+    position:absolute; left:10px; bottom:10px; font-size:11px; color:var(--ink-soft);
+    pointer-events:none; z-index:1;
   }
   .gallery-slide img{
     width:100%; height:100%; object-fit:cover; display:block;
@@ -399,12 +403,12 @@
           <div class="gallery-slide"><img src="img/C2.jpg" alt="우리의 순간 8" loading="lazy"></div>
           <div class="gallery-slide"><img src="img/C3.jpg" alt="우리의 순간 9" loading="lazy"></div>
           <div class="gallery-slide"><img src="img/C5.jpg" alt="우리의 순간 10" loading="lazy"></div>
-          <div class="gallery-slide"><img src="img/D5.jpg" alt="우리의 순간 13" loading="lazy"></div>
-          <div class="gallery-slide"><img src="img/D6.jpg" alt="우리의 순간 13" loading="lazy"></div>
-          <div class="gallery-slide"><img src="img/D7.jpg" alt="우리의 순간 13" loading="lazy"></div>
-          <div class="gallery-slide"><img src="img/D8.jpg" alt="우리의 순간 13" loading="lazy"></div>
-          <div class="gallery-slide"><img src="img/D2.jpg" alt="우리의 순간 11" loading="lazy"></div>
-          <div class="gallery-slide"><img src="img/D4.jpg" alt="우리의 순간 13" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/D5.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/D6.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/D7.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/D8.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/D2.jpg" alt="우리의 순간 11" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/D4.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
 
         </div>
       </div>
