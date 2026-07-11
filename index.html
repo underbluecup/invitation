@@ -181,8 +181,12 @@
   }
   .gallery-track::-webkit-scrollbar{ display:none; }
   .gallery-slide{
-    flex:0 0 100%; scroll-snap-align:center; aspect-ratio:3/4; background:var(--cream);
+    position:relative; flex:0 0 100%; scroll-snap-align:center; aspect-ratio:3/4; background:var(--cream);
     -webkit-touch-callout:none;
+  }
+  .pic-credit{
+    position:absolute; left:10px; bottom:10px; font-size:11px; color:var(--ink-soft);
+    pointer-events:none; z-index:1;
   }
   .gallery-slide img{
     width:100%; height:100%; object-fit:cover; display:block;
@@ -398,8 +402,8 @@
           <div class="gallery-slide"><img src="images/C_106-0380-resize.jpg" alt="우리의 순간 9" loading="lazy"></div>
           <div class="gallery-slide"><img src="images/C_106-0382-resize.jpg" alt="우리의 순간 10" loading="lazy"></div>
           <div class="gallery-slide"><img src="images/C_106-0394-resize.jpg" alt="우리의 순간 11" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/C_106-0419-resize.jpg" alt="우리의 순간 12" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/C_106-0485-resize.jpg" alt="우리의 순간 13" loading="lazy"></div>
+          <div class="gallery-slide"><img src="images/C_106-0419-resize.jpg" alt="우리의 순간 12" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="images/C_106-0485-resize.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
         </div>
       </div>
       <button type="button" class="gallery-arrow prev" onclick="galleryMove(-1)" aria-label="이전 사진">‹</button>
