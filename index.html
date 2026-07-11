@@ -131,6 +131,8 @@
     padding:22px 0 26px;
     display:flex;
     justify-content:center;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
   }
   .bounce{ animation:bounce 1.6s ease-in-out infinite; }
   @keyframes bounce{
@@ -344,12 +346,12 @@
     <div class="line l5">삼원가든</div>
   </div>
 
-  <div class="hero-bottom">
+  <a class="hero-bottom" href="#greeting" aria-label="아래로 스크롤">
     <svg class="bounce" width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 8l8 8 8-8" stroke="#292620" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </div>
+  </a>
 
   <!-- ========== GREETING ========== -->
-  <section class="section greeting">
+  <section class="section greeting" id="greeting">
     <p>정현과 현규는 한 집에 사는 가족이 되기로 했습니다.
 서로에게 가장 편안하고 따뜻한 집이 되고자 합니다.
 그 시작의 자리에서 사랑과 기쁨을 나눠주세요.</p>
