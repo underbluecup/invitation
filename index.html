@@ -20,13 +20,13 @@
 <style>
   :root{
     /* 네온 컬러 팔레트 */
-    --blue:         #519769;   /* 배경 블록 (요청하신 배경색) */
+    --blue:         #FFD93D;   /* 배경 블록 (요청하신 배경색) */
     --blue-deep:    #3842FF;   /* 텍스트/포인트용 블루 */
     --mustard:      #A5FF38;   /* 포인트 라임 그린 */
     --mustard-deep: #FF9238;   /* 텍스트용 오렌지 */
-    --terracotta:   #9D75E6;   /* 메인 포인트 핑크 */
-    --sage:         #38FF92;   /* 포인트 민트 그린 */
-    --cream:        #FFFDE8;
+    --terracotta:   #4ECDC4;   /* 메인 포인트 핑크 */
+    --sage:         #87CEEB;   /* 포인트 민트 그린 */
+    --cream:        #F4FBFC;
     --white:        #FFFFFF;
     --ink:          #1B1B1B;
     --ink-soft:     #514f45;
@@ -120,10 +120,11 @@
     line-height:1.45;
     letter-spacing:-.01em;
   }
-  .hero-mid .line.l1{ color:var(--ink); }
-  .hero-mid .line.l2{ color:var(--ink); }
-  .hero-mid .line.l3{ color:var(--ink); margin-top:28px; }
-  .hero-mid .line.l4{ color:var(--ink); margin-top:6px; }
+  .hero-mid .line.l1{ color:var(--ink-soft); }
+  .hero-mid .line.l2{ color:var(--ink-soft); }
+  .hero-mid .line.l3{ color:var(--ink-soft); margin-top:28px; }
+  .hero-mid .line.l4{ color:var(--ink-soft); }
+  .hero-mid .line.l5{ color:var(--ink-soft); }
 
   .hero-bottom{
     background:var(--blue);
@@ -311,7 +312,7 @@
   /* ================= FOOTER ================= */
   footer{ padding:46px 26px 56px; text-align:center; background:var(--blue); }
   footer .fmark{ font-family:'Noto Sans KR', sans-serif; font-weight:700; font-size:15px; color:var(--ink); }
-  footer .fnames{ margin-top:6px; font-family:'Noto Sans KR', sans-serif; font-weight:900; font-size:18px; color:var(--terracotta); }
+  footer .fnames{ margin-top:6px; font-family:'Noto Sans KR', sans-serif; font-weight:900; font-size:18px; color:var(--mustard-deep); }
   footer .fdate{ margin-top:4px; font-size:11.5px; font-weight:700; color:var(--ink-soft); }
 
   .toast{
@@ -347,7 +348,7 @@
     <p>정현과 현규는 한 집에 사는 가족이 되기로 했습니다.
 서로에게 가장 편안하고 따뜻한 집이 되고자 합니다.
 그 시작의 자리에서 사랑과 기쁨을 나눠주세요.</p>
-    <div class="sign"><b>한철희 · 민채현의 아들 현규</b><br><b>권오훈 · 임수광의 딸 정현</b></div>
+    <div class="sign"><b>한철희 · 민채현의 아들 현규</b><br><b>권오훈 · 임수광의  딸  정현</b></div>
   </section>
 
   <div class="divider">
@@ -360,7 +361,7 @@
   <section class="section date-section">
     <span class="eyebrow">✎ Wedding Day</span>
     <div class="date-hero">
-      <div class="big">2026.10.10</div>
+      <div class="big">2026.10.10.</div>
       <div class="sub">토요일 오전 11시</div>
       <div class="dday" id="ddayBadge">D-day 계산 중</div>
     </div>
@@ -391,19 +392,24 @@
     <div class="gallery-carousel">
       <div class="gallery-frame">
         <div class="gallery-track" id="galleryTrack">
-          <div class="gallery-slide"><img src="images/1.jpg" alt="우리의 순간 1" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/0516 1630p101443.jpg" alt="우리의 순간 2" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/0516 1630p101464.jpg" alt="우리의 순간 3" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/0516 1630p101514.jpg" alt="우리의 순간 4" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/B_101355-수정.jpg" alt="우리의 순간 5" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/B_101370-수정.jpg" alt="우리의 순간 6" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/C_106-0321-resize.jpg" alt="우리의 순간 7" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/C_106-0360-resize.jpg" alt="우리의 순간 8" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/C_106-0380-resize.jpg" alt="우리의 순간 9" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/C_106-0382-resize.jpg" alt="우리의 순간 10" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/C_106-0394-resize.jpg" alt="우리의 순간 11" loading="lazy"></div>
-          <div class="gallery-slide"><img src="images/C_106-0419-resize.jpg" alt="우리의 순간 12" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
-          <div class="gallery-slide"><img src="images/C_106-0485-resize.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/A1.jpg" alt="우리의 순간 1" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/A2.jpg" alt="우리의 순간 2" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/B1.jpg" alt="우리의 순간 3" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/B2.jpg" alt="우리의 순간 4" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/B3.jpg" alt="우리의 순간 5" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/B4.jpg" alt="우리의 순간 6" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/C0.jpg" alt="우리의 순간 7" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/C1.jpg" alt="우리의 순간 7" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/C2.jpg" alt="우리의 순간 8" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/C3.jpg" alt="우리의 순간 9" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/C5.jpg" alt="우리의 순간 10" loading="lazy"></div>
+          <div class="gallery-slide"><img src="img/D5.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/D6.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/D7.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/D8.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/D2.jpg" alt="우리의 순간 11" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+          <div class="gallery-slide"><img src="img/D4.jpg" alt="우리의 순간 13" loading="lazy"><span class="pic-credit">pic. soyoung</span></div>
+
         </div>
       </div>
       <button type="button" class="gallery-arrow prev" onclick="galleryMove(-1)" aria-label="이전 사진">‹</button>
@@ -589,8 +595,8 @@
       </div>
 
       <div class="field">
-        <label for="rsvpMsg">전하고 싶은 말 (선택)</label>
-        <textarea id="rsvpMsg" placeholder="축하 메시지를 남겨주세요"></textarea>
+        <label for="rsvpMsg">전하실 말씀(선택)</label>
+        <textarea id="rsvpMsg" placeholder=" "></textarea>
       </div>
 
       <button type="submit" class="submit-btn">전달하기</button>
@@ -620,6 +626,7 @@
     <div class="fmark">🫧🤍☁️감사합니다🍒🌷🩷</div>
     <div class="fnames">한현규 &amp; 권정현</div>
     <div class="fdate">2026. 10. 10 SAT · 삼원가든</div>
+    <div class="fdate">메인 일러스트: yunhwa yang</div>
   </footer>
 
 </div>
