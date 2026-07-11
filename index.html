@@ -183,7 +183,7 @@
   }
   .gallery-track::-webkit-scrollbar{ display:none; }
   .gallery-slide{
-    position:relative; flex:0 0 100%; scroll-snap-align:center; aspect-ratio:3/4; background:var(--cream);
+    position:relative; flex:0 0 100%; scroll-snap-align:center; scroll-snap-stop:always; aspect-ratio:3/4; background:var(--cream);
     -webkit-touch-callout:none;
   }
   .pic-credit{
@@ -245,7 +245,7 @@
   }
   .info-track::-webkit-scrollbar{ display:none; }
   .info-slide{
-    flex:0 0 100%; scroll-snap-align:center; box-sizing:border-box;
+    flex:0 0 100%; scroll-snap-align:center; scroll-snap-stop:always; box-sizing:border-box;
     min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 34px;
   }
   .info-slide .info-title{
