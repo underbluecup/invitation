@@ -120,6 +120,7 @@
 <script>
   var PRESIGN_ENDPOINT = "https://guest-snap-presign.junghyun611.workers.dev";
   var VIDEO_EXT = /\.(mp4|mov|webm|m4v|avi)$/i;
+  var THUMB_SUFFIX = '.thumb.jpg';
 
   function displayName(key){
     // key format: "<timestamp>-<8char-uuid>-<original-filename>"
@@ -128,6 +129,14 @@
 
   function isVideo(key){
     return VIDEO_EXT.test(key);
+  }
+
+  function isThumb(key){
+    return key.indexOf(THUMB_SUFFIX, key.length - THUMB_SUFFIX.length) !== -1;
+  }
+
+  function keyToUrl(publicBase, key){
+    return publicBase.replace(/\/$/, '') + '/' + key.split('/').map(encodeURIComponent).join('/');
   }
 
   function openLightbox(url, key){
@@ -180,17 +189,33 @@
         return;
       }
 
+      var thumbKeys = {};
+      items.forEach(function(item){
+        if(isThumb(item.key)){ thumbKeys[item.key] = true; }
+      });
+
+      var photoItems = items.filter(function(item){ return !isThumb(item.key); });
+
+      if(!photoItems.length){
+        stateEl.textContent = '아직 업로드된 사진이 없어요.';
+        return;
+      }
+
       stateEl.style.display = 'none';
 
-      items.forEach(function(item){
-        var url = publicBase.replace(/\/$/, '') + '/' + item.key.split('/').map(encodeURIComponent).join('/');
+      photoItems.forEach(function(item){
+        var url = keyToUrl(publicBase, item.key);
+        var thumbKey = item.key + THUMB_SUFFIX;
+        // 미리 생성된 작은 썸네일이 있으면 그걸 쓰고, 없으면(예전 업로드) 원본으로 대체합니다.
+        var thumbUrl = thumbKeys[thumbKey] ? keyToUrl(publicBase, thumbKey) : url;
+
         var thumb = document.createElement('button');
         thumb.className = 'gallery-thumb';
         thumb.type = 'button';
 
-        var media = document.createElement(isVideo(item.key) ? 'video' : 'img');
-        media.src = url;
-        if(isVideo(item.key)){ media.muted = true; media.playsInline = true; media.preload = 'metadata'; }
+        var media = document.createElement('img');
+        media.src = thumbUrl;
+        media.loading = 'lazy';
         thumb.appendChild(media);
 
         if(isVideo(item.key)){

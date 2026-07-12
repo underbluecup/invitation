@@ -74,6 +74,14 @@
   }
   .submit-btn:active{ box-shadow:none; transform:translate(4px,4px); }
   .submit-btn:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+  a.submit-btn{ display:block; text-align:center; text-decoration:none; box-sizing:border-box; }
+  .submit-btn.secondary{ background:var(--cream); color:var(--ink); }
+
+  .snap-hint{
+    font-size:12.5px; font-weight:500; color:var(--ink-soft); line-height:1.6;
+    background:var(--cream); border:1.5px dashed var(--line); border-radius:10px;
+    padding:10px 12px; margin:14px 0 16px;
+  }
   .rsvp-done{
     display:none; margin-top:20px; padding:18px; border-radius:14px; border:2.5px solid var(--ink);
     background:var(--sage); color:#fff; font-size:14px; font-weight:700; line-height:1.7; text-align:center;
@@ -132,11 +140,15 @@
 
       <div class="snap-preview" id="snapPreview"></div>
 
+      <p class="snap-hint">💡 한 번에 너무 많이 올리면 시간이 오래 걸리거나 실패할 수 있어요. 사진은 <b>10장 이내</b>, 동영상은 <b>2~3개 이내</b>로 나눠서 올려주시면 안정적이에요.</p>
+
       <button type="submit" class="submit-btn" id="snapSubmit" disabled>업로드하기</button>
+      <a class="submit-btn secondary" href="gallery.html">게스트 갤러리 보기</a>
     </form>
 
     <div class="rsvp-done" id="snapDone">
-      소중한 사진과 영상 감사합니다 🤍<br>업로드가 완료됐어요.<br><a href="gallery.html">모아보기</a> · <a href="index.html">청첩장으로 돌아가기</a>
+      소중한 사진과 영상 감사합니다 🤍<br>업로드가 완료됐어요.<br>
+      <a href="#" id="snapUploadMore">다른 사진 더 올리기</a> · <a href="gallery.html">게스트 갤러리 보기</a> · <a href="index.html">청첩장으로 돌아가기</a>
     </div>
   </section>
 
@@ -162,28 +174,116 @@
   // R2 자체에는 이런 제약이 없습니다.
   var MAX_FILE_BYTES = 500 * 1024 * 1024;
 
+  // 갤러리에서 원본을 통째로 내려받지 않도록, 업로드 시점에 작은 썸네일을
+  // 만들어 "<원본키>.thumb.jpg"로 함께 올려둡니다. 썸네일 생성/업로드는
+  // best-effort라 실패해도 원본 업로드 자체는 성공 처리합니다.
+  var THUMB_MAX_DIM = 480;
+  var THUMB_QUALITY = 0.72;
+
+  function presign(body){
+    return fetch(PRESIGN_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function(res){
+      if(!res.ok){ throw new Error('presign failed'); }
+      return res.json();
+    });
+  }
+
+  function putToR2(uploadUrl, blob, contentType){
+    return fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': contentType },
+      body: blob
+    }).then(function(res){
+      if(!res.ok){ throw new Error('upload failed'); }
+    });
+  }
+
+  function resizeImageToBlob(file, maxDim, quality){
+    return new Promise(function(resolve, reject){
+      var objectUrl = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function(){
+        var scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+        var w = Math.round(img.naturalWidth * scale) || maxDim;
+        var h = Math.round(img.naturalHeight * scale) || maxDim;
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(function(blob){
+          URL.revokeObjectURL(objectUrl);
+          blob ? resolve(blob) : reject(new Error('thumbnail encode failed'));
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = function(){ URL.revokeObjectURL(objectUrl); reject(new Error('image load failed')); };
+      img.src = objectUrl;
+    });
+  }
+
+  function captureVideoFrameToBlob(file, maxDim, quality){
+    return new Promise(function(resolve, reject){
+      var objectUrl = URL.createObjectURL(file);
+      var video = document.createElement('video');
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+
+      function cleanup(){ URL.revokeObjectURL(objectUrl); }
+
+      video.addEventListener('loadedmetadata', function(){
+        video.currentTime = Math.min(0.1, (video.duration || 1) / 2);
+      });
+      video.addEventListener('seeked', function onSeeked(){
+        video.removeEventListener('seeked', onSeeked);
+        try{
+          var scale = Math.min(1, maxDim / Math.max(video.videoWidth, video.videoHeight));
+          var w = Math.round(video.videoWidth * scale) || maxDim;
+          var h = Math.round(video.videoHeight * scale) || maxDim;
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+          canvas.toBlob(function(blob){
+            cleanup();
+            blob ? resolve(blob) : reject(new Error('thumbnail encode failed'));
+          }, 'image/jpeg', quality);
+        } catch(err){
+          cleanup();
+          reject(err);
+        }
+      });
+      video.addEventListener('error', function(){ cleanup(); reject(new Error('video load failed')); });
+      video.src = objectUrl;
+    });
+  }
+
+  function makeThumbnailBlob(file){
+    var isVideo = file.type.indexOf('video') === 0;
+    var task = isVideo
+      ? captureVideoFrameToBlob(file, THUMB_MAX_DIM, THUMB_QUALITY)
+      : resizeImageToBlob(file, THUMB_MAX_DIM, THUMB_QUALITY);
+    return task.catch(function(){ return null; });
+  }
+
+  function uploadThumbnail(originalKey, file){
+    return makeThumbnailBlob(file).then(function(blob){
+      if(!blob) return;
+      return presign({ key: originalKey + '.thumb.jpg', contentType: 'image/jpeg' })
+        .then(function(data){ return putToR2(data.uploadUrl, blob, 'image/jpeg'); })
+        .catch(function(){ /* thumbnail is best-effort */ });
+    });
+  }
+
   function uploadFile(file, guestName){
     var filename = (guestName ? guestName + '_' : '') + file.name;
     var contentType = file.type || 'application/octet-stream';
 
-    return fetch(PRESIGN_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename: filename, contentType: contentType })
-    })
-      .then(function(res){
-        if(!res.ok){ throw new Error('presign failed'); }
-        return res.json();
-      })
+    return presign({ filename: filename, contentType: contentType })
       .then(function(data){
-        return fetch(data.uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': contentType },
-          body: file
+        return putToR2(data.uploadUrl, file, contentType).then(function(){
+          return uploadThumbnail(data.key, file);
         });
-      })
-      .then(function(res){
-        if(!res.ok){ throw new Error('upload failed'); }
       });
   }
 
@@ -244,6 +344,18 @@
           submitBtn.disabled = false;
           submitBtn.textContent = '업로드하기';
         });
+    });
+
+    document.getElementById('snapUploadMore').addEventListener('click', function(e){
+      e.preventDefault();
+      selectedFiles = [];
+      fileInput.value = '';
+      preview.innerHTML = '';
+      pickerText.textContent = '사진/동영상 선택하기';
+      submitBtn.disabled = true;
+      submitBtn.textContent = '업로드하기';
+      document.getElementById('snapDone').style.display = 'none';
+      form.style.display = '';
     });
   })();
 </script>
