@@ -107,6 +107,11 @@
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
     font-size:18px; color:#fff; background:rgba(0,0,0,.25); pointer-events:none;
   }
+  .snap-thumb-remove{
+    position:absolute; top:5px; right:5px; width:20px; height:20px; border-radius:50%;
+    background:rgba(27,27,27,.8); color:#fff; border:none; font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; line-height:1;
+  }
 
   .toast{
     position:fixed; left:50%; bottom:26px; transform:translate(-50%, 20px);
@@ -295,17 +300,9 @@
     var form = document.getElementById('snapForm');
     var selectedFiles = [];
 
-    fileInput.addEventListener('change', function(){
-      var picked = Array.prototype.slice.call(fileInput.files);
-      var tooBig = picked.filter(function(file){ return file.size > MAX_FILE_BYTES; });
-      selectedFiles = picked.filter(function(file){ return file.size <= MAX_FILE_BYTES; });
-
-      if(tooBig.length){
-        showToast(tooBig.length + '개 파일이 너무 커서 제외됐어요 (500MB 이하만 가능)');
-      }
-
+    function renderPreview(){
       preview.innerHTML = '';
-      selectedFiles.forEach(function(file){
+      selectedFiles.forEach(function(file, index){
         var isVideo = file.type.indexOf('video') === 0;
         var thumb = document.createElement('div');
         thumb.className = 'snap-thumb';
@@ -319,10 +316,32 @@
           play.textContent = '▶';
           thumb.appendChild(play);
         }
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'snap-thumb-remove';
+        removeBtn.setAttribute('aria-label', '선택 취소');
+        removeBtn.textContent = '✕';
+        removeBtn.addEventListener('click', function(){
+          selectedFiles.splice(index, 1);
+          renderPreview();
+        });
+        thumb.appendChild(removeBtn);
         preview.appendChild(thumb);
       });
       pickerText.textContent = selectedFiles.length ? selectedFiles.length + '개 선택됨' : '사진/동영상 선택하기';
       submitBtn.disabled = selectedFiles.length === 0;
+    }
+
+    fileInput.addEventListener('change', function(){
+      var picked = Array.prototype.slice.call(fileInput.files);
+      var tooBig = picked.filter(function(file){ return file.size > MAX_FILE_BYTES; });
+      selectedFiles = picked.filter(function(file){ return file.size <= MAX_FILE_BYTES; });
+
+      if(tooBig.length){
+        showToast(tooBig.length + '개 파일이 너무 커서 제외됐어요 (500MB 이하만 가능)');
+      }
+
+      renderPreview();
     });
 
     form.addEventListener('submit', function(e){
